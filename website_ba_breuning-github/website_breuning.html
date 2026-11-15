@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Nachhaltigkeit im Münchner Alltag</title>
+
+   <!-- Mapbox CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+
+    <!-- Mapbox JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+
+    <!-- für csv -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <style>
+        body {
+            /*Hintergrund Farbe */
+            background-color: #344c35;
+            /*Farbe schrift*/
+            color: #f6eee1;
+            margin: 0;
+            min-height: 100vh;
+
+            /*display: flex;
+            justify-content: flex-end; /* rechts */
+            /*align-items: center;       /* vertikal mittig */
+            
+            /*padding-top: 60px;*/
+
+            position: relative; /*für Bild*/
+        }
+        /*Ausrichtung Textblock für Überschriften */
+        .textblock {
+             position: absolute;
+             right: 40px;
+             top: 45%;
+
+             transform: translateY(-50%);
+
+             text-align: left;
+
+             /*position: relative;*/ 
+             z-index: 2; /* Überschrift über dem Bild liegt */
+
+             
+        }
+        
+
+        /*Überschriften Formatierung */
+        h1 {
+            font-family: Impact, sans-serif;
+            font-size: 80pt;
+            margin-right: 60px; /* Abstand vom Rand */
+            margin-top: -140px;
+        }
+        h2 {
+            font-family: Impact, sans-serif;
+            font-size: 48pt;
+            margin: 0;
+            margin-top: -50px;
+        }
+
+        .info-box {
+            /*margin-top: 20px;*/
+            position: absolute;
+
+            right: 40px;  
+            top: 54%;
+            width: 550px; /* breiter */
+            padding: 20px;
+
+            
+
+            background-color: #f6eee1;
+            color: #f8ad20;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 16pt;
+
+            border-radius: 15px;
+
+           
+        }
+
+        /* Bild */
+        .side-image {
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            width: 650px;
+            opacity: 1;
+
+            border-radius: 15px;
+
+            z-index: 1; /* Bild liegt hinter dem Text */
+           
+        }
+
+        
+
+        /* Menüleiste oben */
+        header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 9999;
+            background-color: #344c35;
+        }
+
+        /* Hamburger Button */
+        .menu-button {
+            font-size: 50px;
+            color: #f6eee1;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+        /* Ausklapp-Menü */
+        nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+
+            z-index: 2000; 
+
+            background-color: #344c35;
+            width: 300px;
+            padding-top: 20px;
+
+            background-color: #344c35;
+
+            display: none; /* versteckt */
+            flex-direction: column;
+
+            border-left: 3px solid #1f2d20;
+            border-bottom: 3px solid #1f2d20;
+
+            border-bottom-left-radius: 12px;
+        }
+
+         nav.active {
+            display: flex;
+        }
+
+
+        nav a {
+            color: #f6eee1;
+            text-decoration: none;
+            padding: 18px;
+            font-family: Impact, sans-serif;
+        }
+
+        nav a:hover {
+            background-color: #2a3d2b;
+        }
+
+
+       
+
+        
+
+    
+        /*Button scroll-down*/
+        .scroll-button {
+             position: absolute;
+
+            left: 50%;
+            bottom: 30px; /* Abstand vom unteren Rand */
+
+            transform: translateX(-50%);
+
+            width: 150px; /* Größe anpassen */
+            cursor: pointer;
+
+            z-index: 5;
+        }
+
+
+
+        /* zweite Seite */
+        .section2 {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+
+            background-color: #f6eee1; 
+        }
+
+
+        /* Button gelb stadtviertel */
+        .dropdown {
+            position: absolute;
+            left: 60px; /* links auf gleicher Linie wie Bild */
+            top: 15%;
+            /*transform: translateY(-50%);*/
+        }
+
+        /* Button gelb stadtviertel*/
+        .dropdown-button {
+            background-color: #f8ad20;
+            color: #000000;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 18pt;
+
+            padding: 10px 15px;
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+
+            justify-content: space-between;
+            padding: 10px 15px;
+            /*gap: 10px;*/
+            width:300px;
+        }
+
+        /* Pfeil */
+        .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        /* Pfeil gedreht */
+        .arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown-Inhalt */
+        .dropdown-content {
+            position: absolute; 
+            top: 100%; /* direkt unter dem Button */
+            left: 0;
+            display: none;
+
+            margin-top: 5px;
+            width: 100%;
+
+            background-color: rgba(248, 173, 32, 0.8); /* transparent */
+
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 10px;
+
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        /* Optionen */
+        .dropdown-content div {
+            padding: 10px 15px;
+            cursor: pointer;
+
+            font-family: "Avenir Next Condensed", sans-serif; 
+            font-size: 14pt; 
+            color: #000000; 
+        }
+
+        .dropdown-content div:hover {
+            background-color: #e09c1c;
+        }
+
+
+            /*flyer code */
+        .flyer-code-box {
+            position: absolute;
+
+            left: 60px;
+            top: 25%;
+
+            width: 300px;
+            height: 55px;
+
+            background-color: #f8ad20;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 15px;
+
+            box-sizing: border-box;
+        }
+
+        .flyer-label {
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 12pt;
+
+            color: #000000;
+        }
+
+        #flyer-code-input {
+            width: 80px;
+            height: 32px;
+
+            border: none;
+            outline: none;
+
+            border-radius: 8px;
+
+            padding: 0 10px;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 14pt;
+
+            text-transform: uppercase;
+        }
+
+
+        /* Kasten für Kategorien*/
+        .category-box {
+            position: absolute;
+            left: 60px;
+            top: calc(30% + 20px); /* unter Dropdown */
+
+            width: 300px;
+            /*height: 520px;*/ /* neu eingefügt */
+            height: 65vh;
+
+            background-color: #f6eee1;
+            border: 2px solid #f8ad20;
+
+            border-radius: 15px;
+            padding: 25px; /* davor 15 */
+
+            /*overflow-y: auto;/* neu eingefügt x3 */
+            /*overflow-x: hidden;*/
+
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;    
+
+        }
+
+        /* Überschrift */
+        .category-box h3 {
+            font-family: Impact, sans-serif;
+            font-size: 36pt;
+            margin-top: 0;
+
+            margin-bottom: 10px;
+            color: #344c35;
+
+            position: sticky;
+            top: 0;
+
+            background-color: #f6eee1;
+
+            z-index: 10;
+            
+        }
+
+        /* Kategorien */
+        .category {
+            font-family: "Avenir Next Condensed", sans-serif;
+
+            font-size: 16pt;
+            color: #000000;
+
+            cursor: pointer;
+
+            /*display: flex;
+            align-items: center;*/
+
+            gap: 12px;
+
+            margin-bottom: 10px;
+        }
+
+        /* Dreieck kategorien */
+        .triangle {
+            font-size: 16px;
+
+            transition: transform 0.3s ease;
+        }
+
+        /* gedreht */
+        .triangle.rotate {
+            transform: rotate(90deg);
+        }
+
+        /* Unterkategorien */
+        .subcategory {
+            display: none;
+
+            padding-left: 40px;
+            margin-top: 5px;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 18pt;
+
+            color: #000000;
+
+            line-height: 1.5;
+        }
+
+        /*hover-effekt für orte*/
+        .subcategory div {
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .subcategory div:hover {
+            color: #f6eee1;
+
+            transform: translateX(5px);
+        }
+
+        /*scrollbar für kategorie kasten*/
+        .category-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .category-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .category-box::-webkit-scrollbar-thumb {
+            background: #f6eee1;
+            border-radius: 20px;
+        }
+
+            /*scrollen in box*/
+        .category-scroll {
+            /*max-height: 420px;*/
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            padding-right: 10px;
+            /*margin-top: 80px;*/
+        }
+        /*damit die einzelne kategorien als header bleiben */
+        .category-header {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+
+            background-color: #f6eee1;
+
+            z-index: 5;
+
+            padding: 5px 0;
+        }
+
+        /* großer grüner Kasten rechts */
+        .big-box {
+            position: absolute;
+            right: 60px; /* gleicher Abstand wie oben */
+            top: 15%;
+            /*transform: translateY(-50%);*/
+
+            width: 800px;
+            height: 70%;
+            padding: 30px;
+
+            background-color: #344c35;
+            color: #f6eee1;
+
+            border-radius: 20px;
+            overflow: hidden;
+           
+        }
+
+        
+
+        .section1 {
+            height: 100vh;
+            position: relative;
+            padding-top: 20px;
+        }
+
+
+        #header-title {
+            position: absolute;
+            left: 20px;
+
+            font-family: Impact, sans-serif;
+            font-size: 36px;
+            color: #f6eee1;
+
+            opacity: 0; /*  erstmal unsichtbar */
+            transition: opacity 0.3s ease;
+        }
+
+        /*Karte*/
+        .map-container {
+            /*height: calc(100% - 60px);*/ /* Platz für Überschrift */
+            width: 100%;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            /*margin-top: 20px;*/
+            border-radius: 15px;
+            
+        }
+        /*gelber button stadtviertel*/
+        #selected-option {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .main-text {
+            font-size: 18pt;
+        }
+
+        .sub-text {
+            font-size: 10pt;
+            opacity: 0.7;
+        }
+
+
+        /*für marker auf karte*/
+        .marker {
+            cursor: pointer;
+            /*transition: transform 0.2s ease;*/
+        }
+
+        .marker:hover {
+            transform: scale(1.2);
+        }
+
+
+
+        /* SECTION 3 – Impressum */
+        .section3 {
+            height: 100vh;
+            width: 100%;
+            background-color: #344c35;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container */
+        .impressum-container {
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        /* Titel */
+        .impressum-title {
+            font-family: Impact, sans-serif;
+            font-size: 60px;
+            margin-bottom: 40px;
+        }
+
+        /* Spalten */
+        .impressum-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+
+        /* einzelne Spalte */
+        .column {
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 16pt;
+            line-height: 1.5;
+
+            border-left: 2px solid #f6eee1;
+            padding-left: 20px;
+        }
+
+        /* erste Spalte ohne Linie */
+        .column:first-child {
+            border-left: none;
+            padding-left: 0;
+        }
+
+
+        /* Header impressum */
+        .impressum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* HM Logo rechts */
+        .hm-logo {
+            width: 160px; 
+            height: auto;
+        }
+        .footer-note {
+            margin-top: 50px;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+            font-size: 11pt;
+
+            color: #f6eee1;
+
+            line-height: 1.5;
+
+            opacity: 0.8;
+        }
+        
+        /*-----Pop up style-----*/
+        /* Popup Hintergrund */
+        .mapboxgl-popup-content {
+            background-color: #344c35;
+            color: #f6eee1;
+
+            border-radius: 15px;
+
+            font-family: "Avenir Next Condensed", sans-serif;
+
+            padding: 15px;
+
+            box-shadow: none;
+        }
+
+        /* kleiner Pfeil unten */
+        .mapboxgl-popup-tip {
+            border-top-color: #344c35;
+            border-bottom-color: #344c35;
+        }
+
+        /* Titel */
+        .mapboxgl-popup-content h3 {
+            margin-top: 0;
+            color: #f8ad20;
+
+            font-family: Impact, sans-serif;
+        }
+
+        /* Link */
+        .mapboxgl-popup-content a {
+            color: #f8ad20;
+            text-decoration: none;
+        }
+
+        .mapboxgl-popup-content a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* Schließen-Button */
+        .mapboxgl-popup-close-button {
+            color: #f6eee1;          /* beige */
+            
+            font-size: 22px;         /* größer */
+            
+            padding: 8px 12px;       /* mehr Abstand */
+
+            right: 5px;
+            top: 5px;
+
+            background: transparent;
+            border: none;
+
+            cursor: pointer;
+        }
+
+        /* Hover Effekt */
+        .mapboxgl-popup-close-button:hover {
+            background-color: transparent;
+            color: #f8ad20; /* gelb beim Hover */
+        }
+
+        /*Style für Liste der Orte*/
+        .subcategory div {
+            padding: 6px 0;
+            transition: 0.2s ease;
+        }
+
+        .subcategory div:hover {
+            color: #f8ad20;
+            transform: translateX(3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="section1">
+    <!-- Bild -->
+    <img src="_MG_8506.JPG" class="side-image">
+
+    
+    <header>
+        <!-- Titel auf Seite2 -->
+        <div id="header-title">Nachhaltigkeit im Münchner Alltag</div>
+
+       
+
+
+        <!--Hamburgermenü-->
+         <div class="menu-button" onclick="toggleMenu()">
+        ☰
+         </div>
+    </header>
+
+    
+
+
+    <!--für Seitennavigation-->
+    <nav id="menu">
+        <a href="#">Startseite</a>
+       
+        <a href="#karte">Karte</a>
+        <a href="#impressum">Impressum</a>
+    </nav>
+     
+    <div class="textblock">
+        <!--Überschriften -->
+         <h1>Nachhaltigkeit</h1>
+         <h2>im Münchner Alltag</h2>
+       
+
+    </div>
+    
+    <!--Infobox mit Text -->
+    <div class="info-box">
+        Gestalte deinen nachhaltigen urbanen Alltag: Dein Alltag ist oft stressig, du möchtest jedoch gerne mehr Nachhaltigkeit leben? Dann ist diese Website genau für dich! Hier findest du alles an Nachhaltigkeit was dein Stadtviertel zu bieten hat. Über Essensmöglichkeiten, Second Handshops, Reparatur Cafés und vieles mehr!
+    </div> 
+
+    <!--Scroll Button-->
+    <img src="scroll_down_button.svg" class="scroll-button" onclick="scrollDown()">
+
+    </div>
+
+    
+    
+    
+<!--Seite 2 -->
+
+    <div class="section2" id="karte">
+        <div class="dropdown">
+            <div class="dropdown-button" onclick="toggleDropdown()">
+                <span id="selected-option">
+                     <span class="main-text">Maxvorstadt</span><br>
+                     <span class="sub-text">bitte auswählen</span>
+                </span>
+                <span class="arrow" id="arrow">▼</span>
+            </div>
+
+            <div class="dropdown-content" id="dropdown-content">
+                <div onclick="selectOption('Maxvorstadt')">Maxvorstadt</div>
+                <div onclick="selectOption('Stadt München')">Stadt München</div>
+            </div>
+        </div>
+
+
+        <div class="category-box">
+
+            <h3>Kategorien</h3>
+
+            <div class="category-scroll">
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Food</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Second Hand</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Entertainment & Education</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Mobility</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+
+                
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Sustainable Services</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Natural Cosmetics</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Associations</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                 <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Repair Cafés</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+                <div class="category">
+
+                    <div class="category-header" onclick="toggleCategory(this.parentElement)">
+                        <span class="triangle">▶</span>
+                        <span>Urban Gardening</span>
+                    </div>
+
+                    <div class="subcategory"></div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <!--Flyer Code Box-->
+        <div class="flyer-code-box">
+
+            <span class="flyer-label">
+                Bitte Code vom Flyer eingeben
+            </span>
+
+            <input 
+                type="text" 
+                id="flyer-code-input"
+                placeholder="z.B. F1"
+                onkeydown="handleFlyerCode(event)"
+            >
+
+        </div>
+
+
+
+
+
+        <div class="big-box">
+            <!--<h2>Karte</h2>-->
+            <div class="map-container">
+                 <div id="map"></div>
+            </div>
+        </div>
+     
+
+    </div>
+
+    <!-- Seite 3 – Impressum -->
+    <div class="section3" id="impressum">
+
+        <div class="impressum-container">
+
+            <div class="impressum-header">
+                <div class="impressum-title">Impressum</div>
+
+                <img src="Hochschule_Muenchen_Logo Kopie.svg.png" class="hm-logo">
+            </div>
+
+            <div class="impressum-columns">
+
+                <div class="column">
+                    <p><strong>Angefertigt von</strong><br>
+                    Katharina Breuning<br>
+                    k.breuning@hm.edu</p>
+
+                    <p><strong>Studiengang:</strong><br>
+                    GeoVisual Design-Geomatics</p>
+                </div>
+
+                <div class="column">
+                    <p><strong>Erstellt im Rahmen der Bachelor Arbeit</strong></p>
+
+                    <p>Sommersemester 2026<br>
+                    Abgabetermin: 18.05.2026</p>
+                </div>
+
+                <div class="column">
+                    <p><strong>Betreuung der Bachelor Arbeit</strong><br>
+                    Prof. Dr. Markus Oster<br><br>
+                    Fakultät 08<br>
+                    Raum: F 1.25<br>
+                    Adresse: 80333 München, Karlstr. 6<br>
+                    markus.oster@hm.edu
+                
+                </p>
+                </div>
+
+                <div class="column">
+                    <p><strong>Kontakt</strong><br>
+                    Hochschule München<br>
+                    Fakultät für Geoinformation<br>
+                    Karlstraße 6<br>
+                    80333 München</p>
+                </div>
+
+            </div>
+
+
+            <div class="footer-note">
+                Stand der inhaltlichen Daten: 07.04.2026;<br>
+                Quelle der inhaltl. Daten aus eigener Recherche und teilweise von Green City e.V.;<br>
+                Kartengrundlage (Karte Rückseite) Google Maps;<br>
+                
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+     <!--JavaScript -->
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("menu");
+            menu.classList.toggle("active");
+        }
+
+        function toggleSearch() {
+        var box = document.getElementById("search-box");
+
+        if (box.style.display === "block") {
+                box.style.display = "none";
+        } else {
+                box.style.display = "block";
+        }
+        
+        }
+        //für den Scroll-Down Button
+        function scrollDown() {
+            window.scrollBy({
+                top: window.innerHeight,
+                behavior: "smooth"
+            });
+        }
+
+
+        //für den Kasten links 2. Seite
+        function toggleCategory(element) {
+            var sub = element.querySelector(".subcategory");
+            var triangle = element.querySelector(".triangle");
+
+            if (sub.style.display === "block") {
+                sub.style.display = "none";
+                triangle.classList.remove("rotate");
+            } else {
+                sub.style.display = "block";
+                triangle.classList.add("rotate");
+            }
+        }
+
+
+        let mapLoaded = false;
+
+        window.addEventListener("scroll", function() {
+            var section2 = document.querySelector(".section2");
+            var title = document.getElementById("header-title");
+
+            var sectionTop = section2.getBoundingClientRect().top;
+            
+            if (sectionTop <= window.innerHeight && !mapLoaded) {
+                initMap();   // MAP STARTET HIER
+                mapLoaded = true;
+            }
+            if (sectionTop <= 0) {
+                title.style.opacity = "1"; // sichtbar
+            } else {
+                title.style.opacity = "0"; // unsichtbar
+            }
+        }); 
+
+        
+        function toggleDropdown() {
+            var content = document.getElementById("dropdown-content");
+            var arrow = document.getElementById("arrow");
+
+            if (content.style.display === "block") {
+                content.style.display = "none";
+                arrow.classList.remove("rotate");
+            } else {
+                content.style.display = "block";
+                arrow.classList.add("rotate");
+            }
+        }
+
+        function selectOption(option) {
+            document.getElementById("selected-option").innerText = option;
+
+            document.getElementById("dropdown-content").style.display = "none";
+            document.getElementById("arrow").classList.remove("rotate");
+       
+            if (!map) return;
+
+            if (option === "Maxvorstadt") {
+                map.flyTo({
+                    center: [11.5666, 48.1490],
+                    zoom: 14,
+                    speed: 1.2
+                });
+            }
+
+            if (option === "Stadt München") {
+                map.flyTo({
+                    center: [11.5820, 48.1351],
+                    zoom: 11,
+                    speed: 1.2
+                });
+            }
+       
+        }
+
+        let map;
+        let allMarkers = [];
+        //mapbox Karte mit Style
+        function initMap() {
+            mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0aGkyMyIsImEiOiJjbTljaGV3NHEwMnppMnFyN3U2cnN3dmhzIn0.LB9uWoNTmL-ybe-Hj2_r1Q';
+
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/kathi23/cmomvyny9003001sadymc74ru', 
+                center: [11.5693, 48.1485],
+                zoom: 13
+            });
+
+            map.addControl(new mapboxgl.NavigationControl());
+        
+            map.on('load', function () {
+                
+                loadCSVAndAddMarkers(); // Marker laden
+                
+                setTimeout(() => {
+                    map.resize();
+                }, 300);
+            });
+        
+        
+        }
+       
+
+
+       
+
+        //CSV laden
+        function loadCSVAndAddMarkers() {
+            Papa.parse("daten_ba_aussortiert-2.csv", {
+                download: true,
+                header: true,
+                complete: function(results) {
+
+                    console.log("CSV:", results.data);
+
+                    results.data.forEach(item => {
+
+                        //  FLEXIBEL alle möglichen Varianten abfangen
+                        const lat = parseFloat(item.lat || item["lat "] || item[" lat"]);
+                        const lng = parseFloat(item.long || item["long "] || item[" long"]);
+
+                        if (!lat || !lng) {
+                            console.log("ÜBERSPRUNGEN:", item);
+                            return;
+                        }
+
+                        const idValue = (item.id || item["�id"] || "").trim();
+
+                        addMarker({
+                            id: item["id "],
+                            name: item["Name "],
+                            adresse: item.Adresse,
+                            kategorie: item["id "].trim(),
+                            kategorieName: item["Kategorie "],
+                            beschreibung: item.Besonderheiten,
+                            lng: lng,
+                            lat: lat,
+                            link: item.Link
+                        });
+
+                        createCategoryEntry({
+                            id: item["id "],
+                            name: item["Name "],
+                            kategorie: item["Kategorie "],
+                            lng: lng,
+                            lat: lat
+                        });
+                    });
+                }
+            });
+        }
+
+        //Kasten links neben Karte -> funktion um die orte aufzulisten und auf die Karte zoomen
+        function createCategoryEntry(item) {
+
+            const categories = document.querySelectorAll(".category");
+            categories.forEach(category => {
+
+                const title = category.textContent.trim();
+
+                if (title.includes(item.kategorie)) {
+
+                    const sub = category.querySelector(".subcategory");
+
+                    const entry = document.createElement("div");
+                    entry.textContent = item.name;
+
+                    entry.style.cursor = "pointer";
+                    entry.style.margin = "5px 0";
+                    entry.style.color = "#344c35";
+
+                    entry.onclick = function() {
+                        zoomToMarker(item.lng, item.lat, item.name);
+                    };
+
+                    sub.appendChild(entry);
+                }
+            });
+        }
+
+        function zoomToMarker(lng, lat, name) {
+
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 17,
+                speed: 1.2
+            });
+
+            // passendes Popup öffnen
+            allMarkers.forEach(obj => {
+
+                if (obj.data.name === name) {
+                    obj.marker.togglePopup();
+                }
+            });
+        }
+
+        //Kategorien -> PNG zuordnen
+        function getIconByCategory(kategorie) {
+
+            if (!kategorie) {
+                return "zeichen-food.png";
+            }
+
+            const code = kategorie.toString().trim().toLowerCase();
+
+            // FOOD
+            if (code.startsWith("f")) {
+                return "zeichen-food.png";
+            }
+
+            // SECOND HAND
+            if (code.startsWith("s")) {
+                return "zeichen-second-hand.png";
+            }
+
+            // ENTERTAINMENT & EDUCATION
+            if (code.startsWith("e")) {
+                return "zeichen-e-e.png";
+            }
+
+            // MOBILITY
+            if (code.startsWith("m")) {
+                return "zeichen-mobility.png";
+            }
+
+            // SUSTAINABLE SERVICES
+            if (code.startsWith("d")) {
+                return "zeichen-sustainable-services.png";
+            }
+
+            // NATURAL COSMETICS
+            if (code.startsWith("x")) {
+                return "zeichen-natural-cosmetics.png";
+            }
+
+            // ASSOCIATIONS
+            if (code.startsWith("a")) {
+                return "zeichen-associations.png";
+            }
+
+            // REPAIR CAFÉS
+            if (code.startsWith("r")) {
+                return "zeichen-repair-cafes.png";
+            }
+
+            // URBAN GARDENING
+            if (code.startsWith("u")) {
+                return "zeichen-urban-gardening.png";
+            }
+
+            // fallback
+            return "zeichen-food.png";
+        }
+
+
+        //marker - svg - popup
+        function addMarker(item) {
+
+            const el = document.createElement("div");
+            el.className = "marker";
+
+            const icon = getIconByCategory(item.kategorie);
+
+            //  DEIN PFAD (angepasst!)
+            el.style.backgroundImage = `url(zeichen_website/${icon})`;
+
+            //el.style.width = "25px";
+            //el.style.height = "25px";
+            //el.style.backgroundSize = "contain";
+            //el.style.backgroundRepeat = "no-repeat";
+            el.style.backgroundSize = "contain";
+            el.style.backgroundRepeat = "no-repeat";
+
+            function updateMarkerSize() {
+
+                const zoom = map.getZoom();
+
+                let size;
+
+                if (zoom < 12) {
+                    size = 20;
+                } else if (zoom < 14) {
+                    size = 30;
+                } else if (zoom < 16) {
+                    size = 30;
+                } else {
+                    size = 50;
+                }
+
+                el.style.width = size + "px";
+                el.style.height = size + "px";
+            }
+
+            // direkt einmal ausführen
+            updateMarkerSize();
+
+            // nach Zoom aktualisieren
+            map.on("zoomend", updateMarkerSize);
+
+
+
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                <h3>${item.name}</h3>
+                <p><strong>Adresse:</strong> ${item.adresse}</p>
+                <p><strong>Kategorie:</strong> ${item.kategorieName}</p>
+                <p><strong>Besonderheit:</strong> ${item.beschreibung}</p>
+                <a href="${item.link}" target="_blank">Mehr Infos</a>
+            `);
+
+            const marker = new mapboxgl.Marker(el)
+                .setLngLat([item.lng, item.lat])
+                .setPopup(popup)
+                .addTo(map);
+
+            // Marker speichern
+            allMarkers.push({
+                marker: marker,
+                data: item
+            });
+        }
+
+        //flyer
+        function handleFlyerCode(event) {
+
+            if (event.key !== "Enter") return;
+
+            event.preventDefault();
+
+            const code = event.target.value.trim().toLowerCase();
+
+            allMarkers.forEach(obj => {
+
+                const markerCode = obj.data.id.trim().toLowerCase();
+
+                if (markerCode === code) {
+
+                    map.flyTo({
+                        center: [obj.data.lng, obj.data.lat],
+                        zoom: 17,
+                        speed: 1.2
+                    });
+
+                    obj.marker.togglePopup();
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
